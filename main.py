@@ -26,18 +26,18 @@ for disk in c.Win32_LogicalDisk():
 
 def isFoundRP2Drive():
     for disk in c.Win32_LogicalDisk():
-        # if int(disk.Size) == 134066176 and disk.MediaType == :
-        return disk.Name
+        if disk.VolumeName == "RPI-RP2":
+            return disk.Name
     return None
 
 def isFoundMicroPythonDrive():
     for disk in c.Win32_LogicalDisk():
-        # if int(disk.Size) == 1417216 and disk.MediaType == :
-        return disk.Name
+        if not disk.Size is None and int(disk.Size) == 1417216 and disk.Description == "Removable Disk":
+            return disk.Name
     return None
 
 while True:
-    # os.system("cls")
+    os.system("cls")
     print("===|| KidMotorV4 auto uploader ||===")
     print("------------------------------------")
     print("wait RP2 drive are present...")
@@ -62,9 +62,12 @@ while True:
     port = None
     for info in ports:
         if info.vid == 0x2E8A and info.pid == 0x0005:
-            port = info.port
+            port = info.device
             break
-    print("found {} send soft reset command...", port)
+    if port is None:
+        input("Port not found !, Press the <ENTER> key to restart flow...")
+        continue
+    print("found {} send soft reset command...".format(port))
     with serial.Serial(port, 115200, timeout=1) as ser:
         ser.write(b'\x03') # Ctrl + C
         time.sleep(0.1)
